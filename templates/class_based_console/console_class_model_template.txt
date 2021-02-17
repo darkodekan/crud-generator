@@ -1,0 +1,77 @@
+import csv
+import random
+
+{{ model.name }}_list = []
+
+class {{ model.name }}:
+    def __init__(self,{% for field in model.fields %} {{ field.name }}{% if not loop.last %},{% endif %}{% endfor %}):
+        {% for field in model.fields %}
+        self.{{ field.name }} = {{ field.name }} 
+        {%- endfor %}
+    def __str__(self):
+        return f"{% for field in model.fields %}{ self.{{field.name}} }{% endfor %} "
+
+def read():
+    with open("{{ model.name }}.csv", "w+") as f:
+        citac = csv.reader(f)
+        for row in citac:
+            {%- for field in model.fields %}
+            {%- if field.data_type == "str" %}
+            {{ field.name }} = row[{{ loop.index - 1 }}]
+            {%- else %}
+            {{ field.name }} = {{ field.data_type }}(row[{{ loop.index - 1 }}])
+            {%- endif %}
+            {%- endfor %}
+            {{ model.name }}_object = {{ model.name }}({% for field in model.fields %}{{ field.name }}{% if not loop.last %}, {% endif %}  {% endfor %})
+            {{ model.name }}_list.append({{ model.name }}_object)
+
+def write():
+    with open("{{ model.name }}.csv", "w+") as f:
+        writer = csv.writer(f)
+        for {{ model.name }}_object in {{ model.name }}_list:
+            writer.writerow([
+                {% for field in model.fields %}{{ model.name }}_object.{{ field.name }},
+                {% endfor %}
+                ])
+def find_all():
+    return {{ model.name }}_list
+
+def find_by_id(id):
+    for {{ model.name }}_object in {{ model.name }}_list:
+        if {{ model.name }}_object.id == id:
+            return {{ model.name }}_object
+    return ValueError("no such element with that id")
+
+def find({% for field in model.fields %}{{ field.name }}=None{% if not loop.last %}, {% endif %}{% endfor %}):
+    filtered_list = {{ model.name }}_list
+    {% for field in model.fields %} 
+    if {{ field.name }} is not None:
+        filtered_list = [{{ model.name }} for {{ model.name }} in {{ model.name }}_list if {{ model.name }}.{{ field.name }} == {{ field.name }}]
+    {%- endfor %}
+    return filtered_list
+
+
+def save({{ model.name }}_object):
+    {{ model.name }}_list.append({{ model.name }}_object)
+    write()
+
+
+def remove(id):
+    index = __get_index(id)
+    del {{ model.name }}_list[index]
+
+    write()
+
+def __get_index(id):
+    for i, {{ model.name }}_object in enumerate({{ model.name }}_list):
+        if {{ model.name }}_object.id == id:
+            return i
+    raise ValueError("No such element")
+
+
+def update({{ model.name }}_object):
+    index = __get_index({{ model.name }}_object.id)
+    {{ model.name }}_list[index] = {{ model.name }}_object
+    write()
+
+read()

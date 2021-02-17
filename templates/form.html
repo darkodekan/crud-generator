@@ -1,0 +1,20 @@
+<html>
+    <head>
+
+
+
+    </head>
+    <body>
+        <form>
+            {% for field in model.fields %}
+            <label for="{{ field.name }}">{{ field.name }}</label><br>
+            <input type="text" name="{{ field.name }}" id="{{ field.name }}"><br>
+
+            {% endfor %}
+            <input type="submit" value="Submit">
+        </form>
+
+
+    </body>
+
+</html>

@@ -1,0 +1,33 @@
+<html>
+<head>
+    <title>{{ model.name }}</title>
+</head>
+
+<body>
+    <table border="1">
+        <thead>
+            {% for field in model.fields %}
+            <th>{{ field.name }}</th>
+            {% endfor %}
+
+
+        </thead>
+        <tbody>
+            <tr>
+                {% for field in model.fields %}
+                <td></td>
+                {% endfor %}
+
+            </tr>
+
+
+        </tbody>
+
+
+    </table>    
+
+</body>
+
+
+
+</html>

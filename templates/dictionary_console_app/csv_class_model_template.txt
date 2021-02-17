@@ -1,0 +1,62 @@
+import csv
+import random
+
+{{ klasa }}_list = []
+
+class {{ klasa }}:
+    def __init__(self, {{ model.fields[1:] | join(', ') }}, id=None):
+        self.id = str(random.randint(1,100_000)) if id == None else id
+        {% for field in model.fields[1:] %}self.{{ field.name }} = {{ field.name }}
+        {% endfor %}
+    def __str__(self):
+        return f"{% for field in model.fields %}{ self.{{field}} } {% endfor %} "
+
+def read():
+    with open("{{ klasa }}.csv", "r") as f:
+        citac = csv.reader(f)
+        for row in citac:
+            {% for field in model.fields %}{{ field.name }} = row[{{ loop.index - 1 }}]
+            {% endfor %}
+            {{ klasa }}_object = {{ klasa }}({{ model.fields[1:] | join(', ') }}, id)
+            {{ klasa }}_list.append({{ klasa }}_object)
+
+def write():
+    with open("{{ klasa }}.csv", "w") as f:
+        writer = csv.writer(f)
+        for {{ klasa }}_object in {{ klasa }}_list:
+            writer.writerow([
+                {% for field in model.fields %}{{ klasa }}_object.{{ field.name }},
+                {% endfor %}
+                ])
+def find_all():
+    return {{ klasa }}_list
+
+def find_by_id(id):
+    for {{ klasa }}_object in {{ klasa }}_list:
+        if {{ klasa }}_object.id == id:
+            return {{ klasa }}_object
+    return None
+
+def save({{ klasa }}_object):
+    {{ klasa }}_list.append({{ klasa }}_object)
+    write()
+
+
+def remove(id):
+    global {{ klasa }}_list
+    print({{ klasa }}_list[0])
+    {{ klasa }}_list = [{{ klasa }}_object for {{ klasa }}_object in {{ klasa }}_list if {{ klasa}}_object.id != id]
+    write()
+
+def __get_index(id):
+    for i, {{ klasa }}_object in enumerate({{ klasa }}_list):
+        if {{ klasa }}_object.id == id:
+            return i
+    return None
+
+
+def update({{ klasa }}_object):
+    index = __get_index(id)
+    {{ klasa }}_list[index] = {{ klasa }}_object
+
+read()

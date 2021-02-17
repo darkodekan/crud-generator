@@ -1,0 +1,25 @@
+from sqla_wrapper import SQLAlchemy
+
+db = SQLAlchemy({{ db }})
+{% for model in models %}
+class {{ model.name }}(db.Model):
+    __tablename__ = "{{ model.name }}"
+    {% for field in model.fields %}
+    {% if field.key %}
+        {% if field.key.name == 'PRIMARY' %}
+    {{ field.name }} = db.Column(db.{{ field.db_type }}, primary_key=True)
+
+        {% elif field.key.name == 'FOREIGN' %}
+
+    {{ field.foreign_table | lower }}_id = db.Column(db.Integer, db.ForeignKey({{ model.name }}.id))
+
+
+        {% endif %}
+    {% else %}
+    {{ field.name }} = db.Column(db.{{ field.db_type }})
+
+
+    {% endif %}
+    {% endfor %}
+{% endfor %}
+db.create_all()

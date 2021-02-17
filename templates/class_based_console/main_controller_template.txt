@@ -1,0 +1,30 @@
+{% for model in models %}import {{ model.name }}_controller
+{% endfor %}
+
+
+def print_menu():
+    print()
+    print("App 0.1")
+    print("-"*10)
+    print("0. quit")
+    {% for model in models %}print("{{ loop.index }}. {{ model.name }} ")
+    {% endfor %}
+    print("-"*10)
+    print()
+import os
+def menu():
+    while True:
+        print_menu()
+        choice = input("Option: ")
+        os.system("clear")
+        if choice == "0":
+            break
+        {% for model in models %}
+        if choice == "{{ loop.index }}":
+            {{ model.name }}_controller.menu(){% endfor %}
+        else:
+            print("Command doesn't exist")
+
+if __name__ == "__main__":
+    menu()        
+
