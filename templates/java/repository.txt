@@ -1,0 +1,5 @@
+@Repository
+public interface {{ model.name_c }}Repository extends JpaRepository<{{ model.name_c  }}, Integer> {
+
+	
+}

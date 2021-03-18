@@ -1,0 +1,89 @@
+import os
+import console
+import {{ model.name_s }}_model
+
+{%- for field in model.fields %}
+{%- if field.foreign_model %}
+import {{ field.foreign_model.name_s }}_ui
+{%- endif %}
+{%- endfor %}
+
+
+
+def show_menu():
+    print()
+    print("-"*10)
+    print("{{ model.name_s }}")
+    print("0. Go Back")
+    print("1. Show all")
+    print("2. Add")
+    print("3. Remove")
+    print("4. Update")
+    print("-"*10)
+    print()
+
+def clear_screen():
+    os.system("clear")
+
+def print_all({{ model.name_s }}_list):
+    print(f"{% for field in model.fields %}{'{{ field.name_s }}':<15}{%endfor %}")
+    print("-"*100)
+    for {{ model.name_s }}_object in {{ model.name_s }}_list:
+        print(f"{% for field in model.fields %}{ {{ model.name_s }}_object.{{ field.name_s }}:<15}{% endfor %}")
+
+def menu():
+    while True:
+        show_menu()
+        choice = console.input_str("Option: ")
+        clear_screen()
+        if choice == "0":
+            break
+        elif choice == "1":
+            show_all()
+        elif choice == "2":
+            add()
+        elif choice == "3":
+            remove()
+        elif choice == "4":
+            update()
+        else:
+            print("Command doesn't exist.")
+
+def show_all():
+    {{ model.name_s }}_list = {{ model.name_s }}_model.find_all()
+    print_all({{ model.name_s }}_list)
+
+def add():
+    {%- for field in model.fields %} 
+    {%- if field.foreign_model %}
+    {{ field.foreign_model.name_s }}_ui.show_all()
+    print("--Pick one--")
+    {%- endif %}
+    {{ field.name }} = console.input_{{ field.data_type }}("{{ field.name_s }}: ")
+    {%- endfor %}
+    {{ model.name_s }}_object = {{ model.name_s }}_model.{{ model.name_p }}({% for field in model.fields %} {{ field.name }}{% if not loop.last %},{% endif %}{% endfor %})
+    {{ model.name_s }}_model.save({{ model.name_s }}_object)
+
+def remove():
+    show_all()
+    id = console.input_int("Enter id of {{ model.name_s }} you want to remove: ")
+    {{ model.name_s }}_model.remove(id)
+
+def update():
+    show_all()
+    {%- for field in model.fields %}
+    {%- if field.primary_key %}
+    print("Enter id of product you want to update.")
+    {%- endif %}
+    {{ field.name }} = console.input_{{ field.data_type }}("{{ field.name_s }}: ")
+    {%- endfor %}
+    {{ model.name_s }}_object = {{ model.name_s }}_model.{{ model.name_p }}({% for field in model.fields %} {{ field.name }}{% if not loop.last %},{% endif %}{% endfor %})
+    {{ model.name_s }}_model.update({{ model.name_s }}_object)
+
+
+
+
+    
+
+if __name__ == "__main__":
+    menu()

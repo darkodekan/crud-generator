@@ -1,0 +1,28 @@
+<html>
+<head>
+
+    <title>
+        {% raw %}
+        {% block title %}
+        {% endblock %}
+        {% endraw %}
+
+    </title>
+
+</head>
+<body>
+    {% for model in models %}
+    <a href="/{{ model.name }}"> {{ model.name }} </a>
+
+    {% endfor %}
+    <hr>
+    {% raw %}
+    {% block body %}
+    {% endblock %}
+    {% endraw %}
+
+</body>
+
+
+
+</html>

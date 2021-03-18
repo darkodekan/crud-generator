@@ -1,0 +1,43 @@
+@Entity
+@Table
+class {{ model.name_p }} {
+    @Id
+    @Column
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+
+    {{ model.fields[0].java_type }} {{ model.fields[0].name_c }};
+    {% for field in model.fields[1:] %}
+    {%- if field.foreign_model %}
+    @ManyToOne
+    @JoinColumn
+    private {{ field.foreign_model | capitalize }} {{ field.foreign_model }};
+
+    {%- else %}
+    @Column
+    private {{ field.java_type }} {{ field.name_c }};
+    {% endif %}
+    {% endfor %}
+    public {{ model.name_p }}({% for field in model.fields %}{{ field.java_type }} {{ field.name_c }}{{ ", " if not loop.last else "" }} {% endfor %} ){
+        
+        {%- for field in model.fields %}
+        this.{{ field.name_c }}={{field.name_c}}; 
+        {%- endfor %}
+
+    }
+
+    {%- for field in model.fields %}
+    public {{ field.java_type }} get{{ field.name_p }}(){
+        return {{ field.name_c }};
+
+    }
+    public  void set{{ field.name_p }}({{ field.java_type }} {{ field.name_c }} ){
+        this.{{ field.name_c }} = {{ field.name_c }};
+
+    }
+    {%- endfor %}
+
+   
+
+
+
+}

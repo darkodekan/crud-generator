@@ -1,0 +1,26 @@
+from tkinter import Tk, Label, Entry, Button
+
+class Window:
+    def __init__(self, master):
+        self.master = master
+        self.__init_ui()
+
+    def __init_ui(self):
+        {% for field in model.fields %}
+        self.label_{{ field.name_s}} = Label(master, text="{{ field.name_s }}")
+        self.entry_{{ field.name_s}} = Entry(master)
+        {% endfor %}
+        self.submit_button = Button(master, text="Submit")
+        self.close_button = Button(master, text="Close", command=master.quit)
+
+        {% for field in model.fields %}
+        self.label_{{ field.name_s }}.pack()
+        self.entry_{{ field.name_s }}.pack()
+        {% endfor %}
+        self.submit_button.pack()
+        self.close_button.pack()
+
+root = Tk()
+
+window = Window(root)
+root.mainloop()

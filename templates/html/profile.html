@@ -1,0 +1,13 @@
+{%raw%}{% extends 'base.html' %}{%endraw%}
+
+{%raw%}
+{% block body %}
+{%endraw%}
+{% for field in model.fields %}
+
+<p>{% raw %} {{ {%endraw%}object.{{field.name}} {% raw %} }} {%endraw%}</p> 
+{% endfor %}
+{%raw%}
+{% endblock %}
+{%endraw%}
+

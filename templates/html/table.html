@@ -1,0 +1,36 @@
+{%raw%}{% extends 'base.html' %}{%endraw%}
+
+{%raw%}
+{% block body %}
+{%endraw%}
+<h3>{{ model.name | upper }}</h3>
+<a href="/{{ model.name }}/add">Add</a>
+<table border="1">
+    <thead>
+        {% for field in model.fields %}
+        <th>{{ field.name }}</th>
+        {% endfor %}
+        <th colspan="2"></th>
+
+    </thead>
+    <tbody>
+        {% raw %} {% for object in object_list %} {% endraw %}
+        <tr>
+            {% for field in model.fields %}
+            <td> {% raw %} {{ {%endraw%}object.{{field.name}} {% raw %} }} {%endraw%}</td>
+            {% endfor %}
+            <td><a href="/{{ model.name }}/{% raw %}{{ object.id }}{% endraw %}/update">Update</a></td>
+            <td><a href="/{{ model.name }}/{% raw %}{{ object.id }}{% endraw %}/delete">Delete</a></td>
+
+        </tr>
+        {% raw %} {% endfor %} {% endraw %}
+
+
+
+    </tbody>
+
+
+</table>    
+{%raw%}
+{% endblock %}
+{%endraw%}

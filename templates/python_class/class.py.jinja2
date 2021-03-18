@@ -1,0 +1,8 @@
+class {{ model.name_p }}:
+    def __init__(self,{% for field in model.fields %} {{ field.name_s }}{% if not loop.last %},{% endif %}{% endfor %}):
+        {%- for field in model.fields %}
+        self.{{ field.name_s }} = {{ field.name_s }} 
+        {%- endfor %}
+
+    def __str__(self):
+        return f"{% for field in model.fields %}{ self.{{field.name_s}} }{% endfor %}"

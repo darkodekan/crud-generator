@@ -1,0 +1,83 @@
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy_serializer import SerializerMixin
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite.db'
+db = SQLAlchemy(app)
+
+{% for model in models %}
+class {{ model.name_p }}(db.Model, SerializerMixin):
+    {%- for field in model.fields %}
+    {%- if field.primary_key %}
+    id = db.Column(db.Integer, primary_key=True, autoincrement = True)
+    {%- elif field.foreign_model %}
+    {{ field.foreign_model.name_s }}_id = db.Column(db.Integer, db.ForeignKey("{{field.foreign_model.name_s}}.id"))
+    {%- else %}
+    {{ field.name_s }} = db.Column(db.{{ field.sqlalchemy_type }}(100))
+    {%- endif %}
+    {%- endfor %}
+    {%- for relationship_model in model.relationship_models %}
+    {{ relationship_model.name_s }}s = db.relationship('{{ relationship_model.name_p }}', backref='{{ model.name_s }}')
+    {%- endfor %}
+   
+{% endfor %}
+
+db.create_all()
+@app.route('/')
+def index():
+    return "Api"
+
+{% for model in models %}
+
+@app.route('/{{ model.name_s }}')
+def {{ model.name_s }}_all():
+    {{ model.name_s }}_list = {{ model.name_p }}.query.all()
+    return jsonify([{{model.name}}.to_dict() for {{model.name}} in {{ model.name_s }}_list])
+
+
+@app.route('/{{ model.name_s }}/<id>')
+def {{ model.name_s }}_profile(id):
+    {{ model.name_s }} = {{ model.name_p }}.query.filter_by(id=id).first()
+    return jsonify({{ model.name_s }}.to_dict())
+
+
+
+@app.route('/{{ model.name_s }}', methods = ['POST'])
+def {{ model.name_s }}_add():
+    data = request.get_json()
+    {% for field in model.fields %}
+    {{ field.name_s }} = data["{{ field.name_s }}"]
+    {%- endfor %}
+    {{ model.name_s }} = {{ model.name_p }}({% for field in model.fields %} {{field.name}}={{ field.name_s }}{% if not loop.last %},{% endif %}{% endfor %})
+    db.session.add({{ model.name_s }})
+    db.session.commit()
+    return 'ok', 201
+
+
+@app.route('/{{ model.name_s }}/<int:id>', methods=['DELETE'])
+def {{ model.name_s }}_delete(id):
+    {{ model.name_s }} = {{ model.name_p }}.query.filter_by(id=id).first()
+    db.session.delete({{ model.name_s }})
+    db.session.commit()
+    return 'ok', 200
+
+@app.route('/{{ model.name_s }}/<id>', methods = ['PUT'])
+def {{ model.name_s }}_update(id):
+    {{ model.name_s }} = {{ model.name_p }}.query.filter_by(id=id).first()
+    data = request.get_json()
+    {% for field in model.fields %}
+    {{ field.name_s }} = data["{{ field.name_s }}"]
+    {%- endfor %}
+    {% for field in model.fields %}
+    {{ model.name_s }}.{{ field.name_s }} = {{ field.name_s }}
+    {% endfor %}
+    db.session.commit()
+    return 'ok', 200
+
+
+
+{% endfor %}
+
+if __name__ == '__main__':
+    app.run(debug=True)

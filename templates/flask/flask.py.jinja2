@@ -1,0 +1,76 @@
+from flask import Flask, render_template, request, redirect
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite.db'
+db = SQLAlchemy(app)
+
+{% for model in models %}
+class {{ model.name_cap }}(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement = True)
+    {% for field in model.fields %}
+    {{ field.name }} = db.Column(db.{{ field.sqlalchemy_type }})
+    {%- endfor %}
+
+{% endfor %}
+
+db.create_all()
+@app.route('/')
+def index():
+    return render_template("index.html")
+
+{% for model in models %}
+
+@app.route('/{{ model.name }}')
+def {{ model.name }}_all():
+    object_list = {{ model.name_cap }}.query.all()
+    return render_template("{{ model.name }}_list.html", object_list = object_list)
+  
+@app.route('/{{ model.name }}/add', methods = ['GET', 'POST'])
+def {{ model.name }}_add():
+    if request.method == 'GET':
+        return render_template('{{ model.name }}_form.html', command='add')
+    
+    {% for field in model.fields %}
+    {{ field.name }} = request.form["{{ field.name }}"]
+    {%- endfor %}
+    {{ model.name }} = {{ model.name_cap }}({% for field in model.fields %} {{field.name}}={{ field.name }}{% if not loop.last %},{% endif %}{% endfor %})
+    db.session.add({{ model.name }})
+    db.session.commit()
+    return redirect('/{{ model.name }}')
+
+
+@app.route('/{{ model.name }}/<id>')
+def {{ model.name }}_profile(id):
+
+    object = {{ model.name_cap }}.query.filter_by(id=id).first()
+    return render_template('{{ model.name }}_object.html', object=object)
+
+@app.route('/{{ model.name }}/<int:id>/delete')
+def {{ model.name }}_delete(id):
+    object = {{ model.name_cap }}.query.filter_by(id=id).first()
+    db.session.delete(object)
+    db.session.commit()
+    return redirect('/{{ model.name }}')
+
+@app.route('/{{ model.name }}/<id>/update', methods = ['GET', 'POST'])
+def {{ model.name }}_update(id):
+    object = {{ model.name_cap }}.query.filter_by(id=id).first()
+    if request.method == 'GET':
+        return render_template('{{ model.name }}_form.html', object = object, command='update')
+    {% for field in model.fields %}
+    {{ field.name }} = request.form["{{ field.name }}"]
+    {%- endfor %}
+   
+    {% for field in model.fields %}
+    object.{{ field.name }} = {{field.name}}
+    {% endfor %}
+    db.session.commit()
+    return redirect("/{{ model.name }}")
+
+
+
+{% endfor %}
+
+if __name__ == '__main__':
+    app.run(debug=True)

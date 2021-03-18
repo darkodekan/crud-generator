@@ -1,0 +1,32 @@
+@RestController
+@RequestMapping("{{ model.name_c }}")
+public class {{ model.name_c }}Controller{
+
+    @Autowired
+    {{ model.name_p }}Service {{ model.name_c }}service;
+
+    @GetMapping("/")
+    public List<{{ model.name_c }}> getAll(@PathVariable("id") Integer id){
+        return {{ model.name_c }}Service.findAll();
+    }
+    @GetMapping("{id}")
+	public {{ model.name_c }} getOne(@PathVariable("id") Integer id) {
+		return {{ model.name_c }}Service.findOne(id);
+	}
+    @PostMapping("")
+    public void saveOne(@RequestBody {{ model.name_p }} {{ model.name_c  }}){
+        return {{ model.name_c }}Service.save({{ model.name_c }});
+    }
+    @PutMapping("/{id}")
+    public void saveAll(@RequestBody {{ model.name_p }} {{ model.name_c }}, @PathVariable("id") Integer id){
+        {{ model.name_p }}.setId(id);
+        return {{ model.name_c}}Service.save({{ model.name_c }});
+    }
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable("id") Integer id){
+        return {{ model.name_c }}Service.delete(id);
+    }
+
+
+
+}

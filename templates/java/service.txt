@@ -1,0 +1,23 @@
+@Service
+public class {{ model.name_p }}Service{
+
+    @Autowired
+    {{ model.name_c }}Repository {{ model.name_c }}Repository;
+
+
+    public void create({{ model.name_c }} {{ model.name_c}}){
+        {{ model.name_c }}Repository.save({{ model.name_c}});
+    }
+    public void delete( int id){
+        {{ model.name_c }}Repository.deleteById(id);
+
+    }
+    public {{ model.name_p }} getOne(int id){
+        return {{ model.name_c}}Repository.findOne(id);
+
+    }
+    public List<{{ model.name_p }}> getAll(){
+        return {{ model.name_c}}Repository.findAll(id);
+
+    }
+}

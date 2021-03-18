@@ -1,0 +1,12 @@
+{%raw%}{% extends 'base.html' %}
+{% block body %}
+{%endraw%}
+<form action="/{{ model.name }}/{%raw%}{% if command=='update' %}{{ object.id }}/update{%else%}add{% endif %}{%endraw%}" method="post">
+    {% for field in model.fields %}
+    <label for="{{ field.name }}">{{ field.name }}</label><br>
+    <input type="{{ field.html_type }}" name="{{ field.name }}" id="{{ field.name }}" value="{%raw%}{% if object is defined %}{{ object {% endraw %}.{{field.name}}{%raw%}}}{% endif %}{%endraw%}"><br>
+
+    {% endfor %}
+    <input type="submit" value="Submit">
+</form>
+{% raw %} {% endblock %} {% endraw %}
