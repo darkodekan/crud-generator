@@ -66,6 +66,7 @@ def remove():
 
 def update():
     show_all()
+    print("Enter id of product you want to update.")
     id = console.input_int("id: ")
     name = console.input_str("name: ")
     price = console.input_float("price: ")

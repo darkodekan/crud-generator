@@ -6,7 +6,7 @@ from crud_code_generator import parse
 class Customer:
     id__pk: int
     name_pers: str
-    AgesAll: int
+    AgesAll__item: int
     hobby: bool
     heh: bool
 
@@ -27,14 +27,24 @@ class Hey:
 
 
 # parse([Customer, Item], "java_repository")
-#parse([Customer, Item, Hey], "console_model")
-#parse([Customer, Item, Hey], "console_ui")
-#parse([Customer, Item, Hey], "console_main")
-#parse([Customer, Item, Hey], "console_input")
-parse([Customer, Item, Hey], "tkinter_form")
+parse([Customer, Item, Hey], "console_model")
+parse([Customer, Item, Hey], "console_ui")
+parse([Customer, Item, Hey], "console_main")
+parse([Customer, Item, Hey], "console_input")
+#parse([Customer, Item, Hey], "tkinter_form")
 
 
-# parse([Customer, Item, Hey], "console_main")
+class Osoba:
+    id__pk: int
+    ime: str
+    prezime: str
+
+class Zadatak:
+    id__pk: int
+    opis: str
+    osoba__osoba: int
+
+parse([Osoba, Zadatak], "flask_api")
 
 
 # USE ENUM

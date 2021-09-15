@@ -12,6 +12,11 @@ PYTHON_CLASS = "python_class/class.py.jinja2"
 CONSOLE_MODEL_CLASS = "console_app_class/console_model_cls.py.jinja2"
 CONSOLE_UI_CLASS = "console_app_class/console_ui_cls.py.jinja2"
 CONSOLE_MAIN_CLASS = "console_app_class/main_ui_cls.py.jinja2"
+
+CONSOLE_MODEL_DICT = "console_app_dict/console_model_dict.py.jinja2"
+CONSOLE_UI_DICT = "console_app_dict/console_ui_dict.py.jinja2"
+CONSOLE_MAIN_DICT = "console_app_dict/main_ui_dict.py.jinja2"
+
 CONSOLE_USER_INPUT = "console_app_class/console.py"
 FLASK_API = "flask/flask_api.py.jinja2"
 TKINTER = "tkinter/tkinter.py.jinja2"
@@ -55,10 +60,13 @@ print(len("#####################################################################
 
 
 class Field:
-    def __init__(self, data_type: str, name: str, primary_key=False, foreign_model: str = None):
+    def __init__(self, data_type: str, name: str, primary_key=False, foreign_key=False, foreign_model: type = None, foreign_model_attr: str = None):
         self.data_type = data_type
         self.name = name
+        self.primary_key = primary_key
+        self.foreign_key = foreign_key
         self.foreign_model = foreign_model  # as in foreign table, foreign key
+        self.foreign_model_attr = foreign_model_attr
 
     @property
     def html_type(self):
@@ -91,6 +99,7 @@ class Field:
         """ snake case - to be used in jinja template"""
         snake_name = re.sub('(?!^)([A-Z]+)', r'_\1', self.name).lower()
         return snake_name
+    
 
     def __str__(self):
         return f"{self.name}"
@@ -118,6 +127,9 @@ class Model:
     
     def __str__(self):
         return f"{self.name}"
+
+    def __getitem__(self, index):
+        return self.fields[index]
  ###############################################################################
 
 
@@ -158,8 +170,29 @@ def generate_console_ui_cls(models):
                       model=model)
 
 
-def generate_main_ui_cls(models):
+def generate_console_main_ui_cls(models):
     generate_code(CONSOLE_MAIN_CLASS,
+                  "main.py",
+                  models=models)
+
+
+def generate_console_model_dict(models):
+    for model in models:
+        generate_code(CONSOLE_MODEL_DICT,
+                      f"{model.name_s}_model.py",
+                      model=model)
+
+
+def generate_console_ui_dict(models):
+    for model in models:
+        generate_code(CONSOLE_UI_DICT,
+                      f"{model.name_s}_ui.py",
+                      model=model)
+
+
+
+def generate_console_main_ui_dict(models):
+    generate_code(CONSOLE_MAIN_DICT,
                   "main.py",
                   models=models)
 
@@ -241,6 +274,13 @@ def generate_console_input(models):
                   models=models)
 
 
+def generate_console_app(models):
+    pass
+
+def generate_console_app_dict(models):
+    pass
+
+
 def generate_full_flask(models):
     generate_index_html(models)
     generate_flask_app(models)
@@ -254,7 +294,10 @@ def _get_code_generator(code_type):
     code_generators = {
         "console_model": generate_console_model_cls,
         "console_ui": generate_console_ui_cls,
-        "console_main": generate_main_ui_cls,
+        "console_main": generate_console_main_ui_cls,
+        "console_model_dict": generate_console_model_dict,
+        "console_ui_dict": generate_console_ui_dict,
+        "console_main_dict": generate_console_main_ui_dict,
         "flask_api": generate_flask_api,
         "flask_app": generate_flask_app,
         "base_html": generate_base_html,
@@ -269,13 +312,50 @@ def _get_code_generator(code_type):
     return code_generators[code_type]
 
 
-models = []
+def serialize_without_foreign_model(cls: type) -> Model:
+    if type(cls) != type:
+        raise TypeError("It needs to be a type object.")
+    fields = []
+    for field_name, field_type in cls.__annotations__.items():
+        if "__" in field_name:
+            field_name_pars, attribute = field_name.split("__")
+            if attribute == "pk":
+                field = Field(field_type.__name__, field_name_pars, primary_key=True)
+            else:
+                field = Field(field_type.__name__, field_name_pars, foreign_key=True, foreign_model_attr=attribute)
+        else:
+            field = Field(field_type.__name__, field_name)
+        fields.append(field)
+
+    model_name = cls.__name__
+    print(model_name)
+    model = Model(model_name, fields)
+    return model    
+
+def get_model(models, name):
+    for model in models:
+        if model.name.lower() == name.lower():
+            return model
+    raise ValueError(f"No such model {name}")
+
+#prvo sve parsiramo registrujemo modele
+# onda ponovo prolazimo kroz sve i ako naletimo na strani dopunimo taj model
+def add_foreign_models(models):
+    for model in models:
+        for field in model.fields:
+            if field.foreign_model_attr:
+                foreign_model = get_model(models, field.foreign_model_attr)
+                field.foreign_model = foreign_model
 
 
+
+"""
 def serialize(cls: type) -> Model:
     "Turns class into a model representation."
+    serialize_without_attributes(cls)
     fields = []
     foreign_models = []
+
     for field_name, field_type in cls.__annotations__.items():
         if "__" in field_name:
             field_name_pars, attribute = field_name.split("__")
@@ -293,7 +373,7 @@ def serialize(cls: type) -> Model:
                         break
                 else:
                     raise ValueError(
-                        f"Can't find {{ model }} model, try changing order.")
+                        f"Can't find {attribute} model, try changing order.")
 
         else:
             field = Field(field_type.__name__, field_name)
@@ -304,16 +384,21 @@ def serialize(cls: type) -> Model:
     #model.relationship_models = relationship_models
 
     return model
-
+"""
 
 def parse(classes, code_type):
     """Loops through classes and generates files
     corresponding to the code type."""
+
+    models = []
+
     for cls in classes:
-        models.append(serialize(cls))
+        model = serialize_without_foreign_model(cls)
+        models.append(model)
+
+    add_foreign_models(models)
     generator = _get_code_generator(code_type)
     generator(models)
-    models.clear()
 
 
 # IMPLEMENT ITERATOR
@@ -326,3 +411,4 @@ def parse(classes, code_type):
 #ADD TO PYTHON CLASSES DOCSTRING __all__
 #SAY THAT _ doesnt import it
 #TALK ABOUT NAME MANGLING
+#add getters and setters to code, and validation

@@ -7,27 +7,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite.db'
 db = SQLAlchemy(app)
 
 
-class Customer(db.Model, SerializerMixin):
-    id = db.Column(db.Integer(100))
-    name_pers = db.Column(db.String(100))
-    ages_all = db.Column(db.Integer(100))
-    hobby = db.Column(db.Boolean(100))
-    heh = db.Column(db.Boolean(100))
+class Osoba(db.Model, SerializerMixin):
+    id = db.Column(db.Integer, primary_key=True, autoincrement = True)
+    ime = db.Column(db.String(100))
+    prezime = db.Column(db.String(100))
    
 
-class Item(db.Model, SerializerMixin):
-    id = db.Column(db.Integer(100))
-    name = db.Column(db.String(100))
-    price = db.Column(db.Float(100))
-    customer_id = db.Column(db.Integer, db.ForeignKey("customer.id"))
-    asd = db.Column(db.String(100))
-   
-
-class Hey(db.Model, SerializerMixin):
-    id = db.Column(db.Integer(100))
-    price = db.Column(db.Float(100))
-    asd = db.Column(db.String(100))
-    uff = db.Column(db.String(100))
+class Zadatak(db.Model, SerializerMixin):
+    id = db.Column(db.Integer, primary_key=True, autoincrement = True)
+    opis = db.Column(db.String(100))
+    osoba_id = db.Column(db.Integer, db.ForeignKey("osoba.id"))
    
 
 
@@ -38,61 +27,59 @@ def index():
 
 
 
-@app.route('/customer')
-def customer_all():
-    customer_list = Customer.query.all()
-    return jsonify([Customer.to_dict() for Customer in customer_list])
+@app.route('/osoba')
+def osoba_all():
+    osoba_list = Osoba.query.all()
+    return jsonify([Osoba.to_dict() for Osoba in osoba_list])
 
 
-@app.route('/customer/<id>')
-def customer_profile(id):
-    customer = Customer.query.filter_by(id=id).first()
-    return jsonify(customer.to_dict())
+@app.route('/osoba/<id>')
+def osoba_profile(id):
+    osoba = Osoba.query.filter_by(id=id).first()
+    return jsonify(osoba.to_dict())
 
 
 
-@app.route('/customer', methods = ['POST'])
-def customer_add():
+@app.route('/osoba', methods = ['POST'])
+def osoba_add():
     data = request.get_json()
     
-    id = data["id"]
-    name_pers = data["name_pers"]
-    ages_all = data["ages_all"]
-    hobby = data["hobby"]
-    heh = data["heh"]
-    customer = Customer( id=id, name_pers=name_pers, AgesAll=ages_all, hobby=hobby, heh=heh)
-    db.session.add(customer)
+    
+    
+    ime = data["ime"]
+    
+    prezime = data["prezime"]
+    osoba = Osoba(   ime=ime ,  prezime=prezime )
+    db.session.add(osoba)
     db.session.commit()
     return 'ok', 201
 
 
-@app.route('/customer/<int:id>', methods=['DELETE'])
-def customer_delete(id):
-    customer = Customer.query.filter_by(id=id).first()
-    db.session.delete(customer)
+@app.route('/osoba/<int:id>', methods=['DELETE'])
+def osoba_delete(id):
+    osoba = Osoba.query.filter_by(id=id).first()
+    db.session.delete(osoba)
     db.session.commit()
     return 'ok', 200
 
-@app.route('/customer/<id>', methods = ['PUT'])
-def customer_update(id):
-    customer = Customer.query.filter_by(id=id).first()
+@app.route('/osoba/<id>', methods = ['PUT'])
+def osoba_update(id):
+    osoba = Osoba.query.filter_by(id=id).first()
     data = request.get_json()
     
-    id = data["id"]
-    name_pers = data["name_pers"]
-    ages_all = data["ages_all"]
-    hobby = data["hobby"]
-    heh = data["heh"]
     
-    customer.id = id
     
-    customer.name_pers = name_pers
+    ime = data["ime"]
     
-    customer.ages_all = ages_all
+    prezime = data["prezime"]
     
-    customer.hobby = hobby
     
-    customer.heh = heh
+    
+    
+    osoba.ime = ime
+    
+    
+    osoba.prezime = prezime
     
     db.session.commit()
     return 'ok', 200
@@ -101,120 +88,59 @@ def customer_update(id):
 
 
 
-@app.route('/item')
-def item_all():
-    item_list = Item.query.all()
-    return jsonify([Item.to_dict() for Item in item_list])
+@app.route('/zadatak')
+def zadatak_all():
+    zadatak_list = Zadatak.query.all()
+    return jsonify([Zadatak.to_dict() for Zadatak in zadatak_list])
 
 
-@app.route('/item/<id>')
-def item_profile(id):
-    item = Item.query.filter_by(id=id).first()
-    return jsonify(item.to_dict())
+@app.route('/zadatak/<id>')
+def zadatak_profile(id):
+    zadatak = Zadatak.query.filter_by(id=id).first()
+    return jsonify(zadatak.to_dict())
 
 
 
-@app.route('/item', methods = ['POST'])
-def item_add():
+@app.route('/zadatak', methods = ['POST'])
+def zadatak_add():
     data = request.get_json()
     
-    id = data["id"]
-    name = data["name"]
-    price = data["price"]
-    customer_id = data["customer_id"]
-    asd = data["asd"]
-    item = Item( id=id, name=name, price=price, customer_id=customer_id, asd=asd)
-    db.session.add(item)
+    
+    
+    opis = data["opis"]
+    
+    osoba = data["osoba"]
+    zadatak = Zadatak(   opis=opis ,  osoba=osoba )
+    db.session.add(zadatak)
     db.session.commit()
     return 'ok', 201
 
 
-@app.route('/item/<int:id>', methods=['DELETE'])
-def item_delete(id):
-    item = Item.query.filter_by(id=id).first()
-    db.session.delete(item)
+@app.route('/zadatak/<int:id>', methods=['DELETE'])
+def zadatak_delete(id):
+    zadatak = Zadatak.query.filter_by(id=id).first()
+    db.session.delete(zadatak)
     db.session.commit()
     return 'ok', 200
 
-@app.route('/item/<id>', methods = ['PUT'])
-def item_update(id):
-    item = Item.query.filter_by(id=id).first()
+@app.route('/zadatak/<id>', methods = ['PUT'])
+def zadatak_update(id):
+    zadatak = Zadatak.query.filter_by(id=id).first()
     data = request.get_json()
     
-    id = data["id"]
-    name = data["name"]
-    price = data["price"]
-    customer_id = data["customer_id"]
-    asd = data["asd"]
     
-    item.id = id
     
-    item.name = name
+    opis = data["opis"]
     
-    item.price = price
+    osoba = data["osoba"]
     
-    item.customer_id = customer_id
     
-    item.asd = asd
     
-    db.session.commit()
-    return 'ok', 200
-
-
-
-
-
-@app.route('/hey')
-def hey_all():
-    hey_list = Hey.query.all()
-    return jsonify([Hey.to_dict() for Hey in hey_list])
-
-
-@app.route('/hey/<id>')
-def hey_profile(id):
-    hey = Hey.query.filter_by(id=id).first()
-    return jsonify(hey.to_dict())
-
-
-
-@app.route('/hey', methods = ['POST'])
-def hey_add():
-    data = request.get_json()
     
-    id = data["id"]
-    price = data["price"]
-    asd = data["asd"]
-    uff = data["uff"]
-    hey = Hey( id=id, price=price, asd=asd, uff=uff)
-    db.session.add(hey)
-    db.session.commit()
-    return 'ok', 201
-
-
-@app.route('/hey/<int:id>', methods=['DELETE'])
-def hey_delete(id):
-    hey = Hey.query.filter_by(id=id).first()
-    db.session.delete(hey)
-    db.session.commit()
-    return 'ok', 200
-
-@app.route('/hey/<id>', methods = ['PUT'])
-def hey_update(id):
-    hey = Hey.query.filter_by(id=id).first()
-    data = request.get_json()
+    zadatak.opis = opis
     
-    id = data["id"]
-    price = data["price"]
-    asd = data["asd"]
-    uff = data["uff"]
     
-    hey.id = id
-    
-    hey.price = price
-    
-    hey.asd = asd
-    
-    hey.uff = uff
+    zadatak.osoba = osoba
     
     db.session.commit()
     return 'ok', 200

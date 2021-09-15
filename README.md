@@ -2,51 +2,24 @@
 
 Generates models, views and controllers for console, gui and web apps.
 
-
-# Configuration
-There is no need to use configure it.
-
-
 # How to use it?
 
-You can generate HTML forms, Tkinter GUIs, Models etc. this way.
-Create class with fields and annotate them:
-
+Create classes with fields and their annotations. 
+Pass a list of those classes to parse function and specify what code you want to generate.
 
 ```
-from code_generator import register, generate
+from crud_code_generator import parse
 
-@register
-class User:
-    int: id
-    email: str
+class Person:
     name: str
+    age: int
 
-@regiser
 class Product:
-    int: id
     name: str
     price: float
 
-generate()
+parse([Person, Product], "flask_api")
 ```
-
-
-
-
-How to run it?
-crud_gen --console-class-view "Product, int:name str:name"
-
-Creates view for console. Example code.
-
-
-crud_gen --console-class-view "Product, int:name str:name"
-
-crud_gen --full-console 
-
-# Contributing
-
-
 
 # About 
 Created by Darko Dekan.

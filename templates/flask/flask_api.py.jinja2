@@ -47,9 +47,11 @@ def {{ model.name_s }}_profile(id):
 def {{ model.name_s }}_add():
     data = request.get_json()
     {% for field in model.fields %}
+    {% if not field.primary_key %}
     {{ field.name_s }} = data["{{ field.name_s }}"]
+    {%- endif %}
     {%- endfor %}
-    {{ model.name_s }} = {{ model.name_p }}({% for field in model.fields %} {{field.name}}={{ field.name_s }}{% if not loop.last %},{% endif %}{% endfor %})
+    {{ model.name_s }} = {{ model.name_p }}({% for field in model.fields %} {% if not field.primary_key %} {{field.name}}={{ field.name_s }} {% if not loop.last %},{% endif %} {%- endif %}{% endfor %})
     db.session.add({{ model.name_s }})
     db.session.commit()
     return 'ok', 201
@@ -67,10 +69,14 @@ def {{ model.name_s }}_update(id):
     {{ model.name_s }} = {{ model.name_p }}.query.filter_by(id=id).first()
     data = request.get_json()
     {% for field in model.fields %}
+    {% if not field.primary_key %}
     {{ field.name_s }} = data["{{ field.name_s }}"]
+    {%- endif %}
     {%- endfor %}
     {% for field in model.fields %}
+    {% if not field.primary_key %}
     {{ model.name_s }}.{{ field.name_s }} = {{ field.name_s }}
+    {%- endif %}
     {% endfor %}
     db.session.commit()
     return 'ok', 200

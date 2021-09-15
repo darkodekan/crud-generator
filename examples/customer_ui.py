@@ -1,6 +1,7 @@
 import os
 import console
 import customer_model
+import item_ui
 
 
 
@@ -50,10 +51,12 @@ def show_all():
 def add():
     id = console.input_int("id: ")
     name_pers = console.input_str("name_pers: ")
-    AgesAll = console.input_int("ages_all: ")
+    item_ui.show_all()
+    print("--Pick one--")
+    ages_all = console.input_int("ages_all: ")
     hobby = console.input_bool("hobby: ")
     heh = console.input_bool("heh: ")
-    customer_object = customer_model.Customer( id, name_pers, AgesAll, hobby, heh)
+    customer_object = customer_model.Customer( id, name_pers, ages_all, hobby, heh)
     customer_model.save(customer_object)
 
 def remove():
@@ -63,6 +66,7 @@ def remove():
 
 def update():
     show_all()
+    print("Enter id of product you want to update.")
     id = console.input_int("id: ")
     name_pers = console.input_str("name_pers: ")
     AgesAll = console.input_int("ages_all: ")

@@ -29,7 +29,7 @@ def print_all({{ model.name_s }}_list):
     print(f"{% for field in model.fields %}{'{{ field.name_s }}':<15}{%endfor %}")
     print("-"*100)
     for {{ model.name_s }}_object in {{ model.name_s }}_list:
-        print(f"{% for field in model.fields %}{ {{ model.name_s }}_object.{{ field.name_s }}:<15}{% endfor %}")
+        print(f"{% for field in model.fields %}{ {{ model.name_s }}_object['{{ field.name_s }}']:<15}{% endfor %}")
 
 def menu():
     while True:
@@ -61,7 +61,7 @@ def add():
     {%- endif %}
     {{ field.name_s }} = console.input_{{ field.data_type }}("{{ field.name_s }}: ")
     {%- endfor %}
-    {{ model.name_s }}_object = {{ model.name_s }}_model.{{ model.name_p }}({% for field in model.fields %} {{ field.name_s }}{% if not loop.last %},{% endif %}{% endfor %})
+    {{ model.name_s }}_object = { {% for field in model.fields %} "{{ field.name_s }}":{{ field.name_s }}{% if not loop.last %},{% endif %}{% endfor %} }
     {{ model.name_s }}_model.save({{ model.name_s }}_object)
 
 def remove():
@@ -75,9 +75,9 @@ def update():
     {%- if field.primary_key %}
     print("Enter id of product you want to update.")
     {%- endif %}
-    {{ field.name }} = console.input_{{ field.data_type }}("{{ field.name_s }}: ")
+    {{ field.name_s }} = console.input_{{ field.data_type }}("{{ field.name_s }}: ")
     {%- endfor %}
-    {{ model.name_s }}_object = {{ model.name_s }}_model.{{ model.name_p }}({% for field in model.fields %} {{ field.name }}{% if not loop.last %},{% endif %}{% endfor %})
+    {{ model.name_s }}_object = { {% for field in model.fields %} "{{ field.name_s }}":{{ field.name_s }}{% if not loop.last %},{% endif %}{% endfor %} }
     {{ model.name_s }}_model.update({{ model.name_s }}_object)
 
 
